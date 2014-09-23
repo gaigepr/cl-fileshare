@@ -10,5 +10,5 @@
 (defvar *configuration-file "fileshare.ini")
 (defvar *configuration* nil)
 
-(defvar *share-root* "")
+(defvar *share-root* "/home/gaige/")
 (defvar *share-index* '())

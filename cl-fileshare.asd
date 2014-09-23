@@ -15,5 +15,6 @@
                :trivial-shell)
   :components ((:file "package")
                (:file "globals" :depends-on ("package"))
-               (:file "server" :depends-on ("globals"))
+               (:file "index")
+               (:file "server" :depends-on ("globals" "index"))
                ))
