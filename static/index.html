@@ -1,0 +1,36 @@
+<html ng-app="fileshareApp">
+  <head>
+    <title>Fileshare</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css"/>
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/angular.js"></script>
+    <script src="/static/js/app.js"></script>
+  </head>
+  <body>
+    <div ng-controller="ShareCtrl">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>
+              path
+            </th>
+            <th>
+              file-type
+            </th>
+          </tr>
+        </thead>
+        <tr ng-repeat="item in index">
+          <td>
+            {{ item.path }}
+          </td>
+          <td>
+            {{ item.fileType }}
+            {{ item.detailType }}
+          </td>
+        </tr>
+      </ul>
+    </div>
+  </body>
+</html>
