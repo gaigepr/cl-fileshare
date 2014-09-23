@@ -14,7 +14,10 @@
         <thead>
           <tr>
             <th>
-              path
+              {{ currentPath }}
+            </th>
+            <th>
+              kind
             </th>
             <th>
               file-type
@@ -24,6 +27,9 @@
         <tr ng-repeat="item in index">
           <td>
             {{ item.path }}
+          </td>
+          <td>
+            {{ item.kind }}
           </td>
           <td>
             {{ item.fileType }}

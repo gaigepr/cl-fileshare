@@ -4,8 +4,11 @@
   (let* ((post-data (hunchentoot:raw-post-data :force-text t)))
     (log:debug post-data)
     (remove "\\"
-            (json:encode-json-alist-to-string (index-directory "/home/gaige/quicklisp/"))
-            :test 'string=)))
+            (json:encode-json-alist-to-string
+             (cons
+              (cons "currentPath" "/home/gaige/quicklisp/")
+              (index-directory "/home/gaige/quicklisp/")))
+             :test 'string=)))
 
 (hunchentoot:define-easy-handler (listing :uri "/stuff") ()
   (setf (hunchentoot:content-type*) "application/json")
