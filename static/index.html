@@ -3,12 +3,15 @@
     <title>Fileshare</title>
     <meta charset="utf-8"/>
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
     <script src="/static/js/jquery-2.1.1.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
     <script src="/static/js/angular.js"></script>
     <script src="/static/js/app.js"></script>
   </head>
   <body>
+
+
     <div ng-controller="ShareCtrl">
       <table class="table table-striped">
         <thead>
@@ -17,26 +20,24 @@
               {{ currentPath }}
             </th>
             <th>
-              kind
-            </th>
-            <th>
-              file-type
+              File-type
             </th>
           </tr>
         </thead>
         <tr ng-repeat="item in index">
           <td>
-            {{ item.path }}
+            <a href="#" ng-click="handleItem(item)">
+              {{ item.path.match(lastPathElementRegexp)[0] }}
+            </a>
           </td>
           <td>
             {{ item.kind }}
-          </td>
-          <td>
             {{ item.fileType }}
             {{ item.detailType }}
           </td>
         </tr>
-      </ul>
     </div>
+
+
   </body>
 </html>

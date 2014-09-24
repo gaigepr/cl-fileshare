@@ -1,27 +1,36 @@
 (in-package :cl-fileshare)
 
-(hunchentoot:define-easy-handler (listing :uri "/api") ()
-  (let* ((post-data (hunchentoot:raw-post-data :force-text t)))
-    (log:debug post-data)
+(hunchentoot:define-easy-handler (api :uri "/index") ()
+  (let* ((post-data (hunchentoot:raw-post-data :force-text t))
+         (json-data (json:decode-json-from-string post-data))
+         (current-path (cdr (assoc :path json-data))))
+    ;; strip out extra \ characters from json string before sending
     (remove "\\"
             (json:encode-json-alist-to-string
              (cons
-              (cons "currentPath" "/home/gaige/quicklisp/")
-              (index-directory "/home/gaige/quicklisp/")))
-             :test 'string=)))
+              (cons "currentPath" current-path)
+              (index-directory current-path)))
+            :test 'string=)))
 
-(hunchentoot:define-easy-handler (listing :uri "/stuff") ()
-  (setf (hunchentoot:content-type*) "application/json")
-  (remove "\\"
-          (json:encode-json-alist-to-string (index-directory "/home/gaige/quicklisp/"))
-          :test 'string=))
+(hunchentoot:define-easy-handler (download-dir :uri "/download-directory") ()
+  (let* ((post-data (hunchentoot:raw-post-data :force-text t))
+         (json-data (json:decode-json-from-string post-data))
+         (path (cdr (assoc :path json-data))))
+    (log:debug path)
+    (if (child-directory-p path *share-root*)
+        (json:encode-json-alist-to-string (list (cons "path"
+                                                      (download-file-or-directory path))))
+        (json:encode-json-alist-to-string '(("error" . "Permission to access path denied"))))))
 
-(hunchentoot:define-easy-handler (download-dir :uri "/download") ()
-  ;(setf (hunchentoot:content-type*) "application/zip")
-  ;(cond ((cl-fad:directory-exists-p "path/to/dir"))
-  ;((cl-fad:file-exists-p "path/to/file")))
-  (hunchentoot:handle-static-file
-   (format nil "~a" (cdr (assoc "file" (hunchentoot:get-parameters* hunchentoot:*request*) :test #'string=)))))
+(defun download-file-or-directory (path) ;; returns a path to be downloaded or nil
+  (cond ((cl-fad:directory-exists-p path)
+         (multiple-value-bind (output message status)
+             (trivial-shell:shell-command
+              (format nil "tar -cvf ~a~a.tar ~a" *share-root* "download" path))
+           (if (eq status 0)
+               (format nil "~a~a" *share-root* "download.tar")
+               (format t "~a ~a ~a" output message status))))
+        ((cl-fad:file-exists-p path) path)))
 
 (defun configure-logging (&key (log-file *log-file*))
   (if *debug*
@@ -37,13 +46,17 @@
         hunchentoot:*log-lisp-warnings-p* t
         hunchentoot:*lisp-errors-log-level* :debug
         hunchentoot:*lisp-warnings-log-level* :debug)
-  (push (hunchentoot:create-folder-dispatcher-and-handler
-         "/static/""~/lisp/cl-fileshare/static/")
-        hunchentoot:*dispatch-table*)
-  (push (hunchentoot:create-static-file-dispatcher-and-handler
-         "/" "static/index.html")
-        hunchentoot:*dispatch-table*)
-  (setq *file-server*
+  (progn
+    (push (hunchentoot:create-folder-dispatcher-and-handler
+           "/static/" "~/lisp/cl-fileshare/static/")
+          hunchentoot:*dispatch-table*)
+    (push (hunchentoot:create-folder-dispatcher-and-handler
+           "/download/" "/home/gaige/Dropbox/")
+          hunchentoot:*dispatch-table*)
+    (push (hunchentoot:create-static-file-dispatcher-and-handler
+           "/" "static/index.html")
+          hunchentoot:*dispatch-table*))
+    (setq *file-server*
         (make-instance
          'hunchentoot:easy-acceptor
          :port *file-port*
