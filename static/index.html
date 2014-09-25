@@ -8,34 +8,51 @@
     <script src="/static/js/bootstrap.min.js"></script>
     <script src="/static/js/angular.js"></script>
     <script src="/static/js/app.js"></script>
+    <script src="/static/js/services.js"></script>
   </head>
   <body>
 
 
     <div ng-controller="ShareCtrl">
+      <span ng-repeat="crumb in crumbs">
+        <a href="#" ng-click="loadNewIndex(joinCrumbs(crumbs.indexOf(crumb)))">
+          {{ crumb }}
+        </a> >>
+      </span>
       <table class="table table-striped">
         <thead>
           <tr>
             <th>
-              {{ currentPath }}
+              {{ currentPath.match(lastPathElementRegexp)[0] }}
             </th>
             <th>
               File-type
+            </th>
+            <th>
+              Options
             </th>
           </tr>
         </thead>
         <tr ng-repeat="item in index">
           <td>
-            <a href="#" ng-click="handleItem(item)">
-              {{ item.path.match(lastPathElementRegexp)[0] }}
-            </a>
+            <div style="text-overflow: ellipses; width: 250px;">
+              <a href="#" ng-click="handleItem(item)">
+                {{ item.path.match(lastPathElementRegexp)[0] }}
+              </a>
+            </div>
           </td>
           <td>
             {{ item.kind }}
             {{ item.fileType }}
             {{ item.detailType }}
           </td>
+          <td>
+            <a href="#" ng-click="handleItem(item)">
+              <span class="glyphicon glyphicon-cloud-download"></span>
+            </a>
+          </td>
         </tr>
+      </table>
     </div>
 
 

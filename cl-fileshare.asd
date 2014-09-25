@@ -9,6 +9,7 @@
   :depends-on (:cl-json
                :cl-fad
                :cl-mime
+               :html-template
                :hunchentoot
                :log4cl
                :sb-concurrency

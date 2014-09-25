@@ -1,16 +1,30 @@
 (in-package :cl-fileshare)
 
-(hunchentoot:define-easy-handler (api :uri "/index") ()
-  (let* ((post-data (hunchentoot:raw-post-data :force-text t))
-         (json-data (json:decode-json-from-string post-data))
-         (current-path (cdr (assoc :path json-data))))
-    ;; strip out extra \ characters from json string before sending
-    (remove "\\"
-            (json:encode-json-alist-to-string
-             (cons
-              (cons "currentPath" current-path)
-              (index-directory current-path)))
-            :test 'string=)))
+(defun generate-index-page ()
+  (with-output-to-string (stream)
+    (html-template:fill-and-print-template
+     #P"static/index.tmpl"
+     (list :index
+           (loop for entry in (index-directory "/home/gaige/Dropbox/")
+              collect (list :path (cdr (assoc "path" entry :test 'string=))
+                            :kind (cdr (assoc "kind" entry :test 'string=))
+                            :file-type (cdr (assoc "fileType" entry :test 'string=))
+                            :detail-type (cdr (assoc "detailType" entry :test 'string=)))))
+                :stream stream)))
+
+(hunchentoot:define-easy-handler (index :uri "/") ()
+  (generate-index-page))
+  ;; (let* ((post-data (hunchentoot:raw-post-data :force-text t))
+  ;;        (json-data (json:decode-json-from-string post-data))
+  ;;        (current-path (cdr (assoc :path json-data))))
+  ;;   ;; strip out extra \ characters from json string before sending
+  ;;   ;;(log:debug (index-directory current-path))
+  ;;   (remove "\\"
+  ;;           (json:encode-json-alist-to-string
+  ;;            (cons
+  ;;             (cons "currentPath" current-path)
+  ;;             (index-directory current-path)))
+  ;;           :test 'string=)))
 
 (hunchentoot:define-easy-handler (download-dir :uri "/download-directory") ()
   (let* ((post-data (hunchentoot:raw-post-data :force-text t))
@@ -26,9 +40,9 @@
   (cond ((cl-fad:directory-exists-p path)
          (multiple-value-bind (output message status)
              (trivial-shell:shell-command
-              (format nil "tar -cvf ~a~a.tar ~a" *share-root* "download" path))
+              (format nil "tar -cvf ~a~a.tar ~a" "/tmp/fileshare/" "download" path))
            (if (eq status 0)
-               (format nil "~a~a" *share-root* "download.tar")
+               (format nil "~a~a" "/tmp/fileshare/" "download.tar")
                (format t "~a ~a ~a" output message status))))
         ((cl-fad:file-exists-p path) path)))
 
@@ -51,11 +65,14 @@
            "/static/" "~/lisp/cl-fileshare/static/")
           hunchentoot:*dispatch-table*)
     (push (hunchentoot:create-folder-dispatcher-and-handler
-           "/download/" "/home/gaige/Dropbox/")
+           "/download/" *share-root*)
           hunchentoot:*dispatch-table*)
-    (push (hunchentoot:create-static-file-dispatcher-and-handler
-           "/" "static/index.html")
+    (push (hunchentoot:create-folder-dispatcher-and-handler
+           "/dl/" "/tmp/fileshare/")
           hunchentoot:*dispatch-table*))
+    ;;(push (hunchentoot:create-static-file-dispatcher-and-handler
+    ;;"/" "static/index.html")
+    ;;hunchentoot:*dispatch-table*))
     (setq *file-server*
         (make-instance
          'hunchentoot:easy-acceptor
@@ -67,3 +84,7 @@
 (defun stop-fileshare ()
   (when *file-server*
     (hunchentoot:stop *file-server* :soft t)))
+
+(defun restart-fileshare ()
+  (stop-fileshare)
+  (start-fileshare))

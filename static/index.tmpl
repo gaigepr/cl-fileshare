@@ -1,0 +1,55 @@
+<html>
+  <head>
+    <title>Fileshare</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <!-- <script src="/static/js/jquery-2.1.1.min.js"></script> -->
+    <!-- <script src="/static/js/bootstrap.min.js"></script> -->
+    <!-- <script src="/static/js/angular.js"></script> -->
+    <!-- <script src="/static/js/app.js"></script> -->
+    <!-- <script src="/static/js/services.js"></script> -->
+  </head>
+  <body>
+
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>
+            <!-- tmpl_var current-path -->
+          </th>
+          <th>
+            File-type
+          </th>
+          <th>
+            Options
+          </th>
+        </tr>
+      </thead>
+      <!-- tmpl_loop index -->
+      <tr>
+        <td>
+          <div style="text-overflow: ellipses; width: 250px;">
+            <a href="">
+              <!-- tmpl_var path -->
+            </a>
+          </div>
+        </td>
+        <td>
+          <!-- tmpl_var kind -->
+          <!-- tmpl_var file-type -->
+          <!-- tmpl_var detail-type -->
+        </td>
+        <td>
+          <a href="">
+            <span class="glyphicon glyphicon-cloud-download"></span>
+          </a>
+        </td>
+      </tr>
+      <!-- /tmpl_loop -->
+    </table>
+
+
+  </body>
+</html>
