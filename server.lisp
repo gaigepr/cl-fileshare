@@ -6,11 +6,19 @@
      #P"static/index.tmpl"
      (list :index
            (loop for entry in (index-directory "/home/gaige/Dropbox/")
-              collect (list :path (cdr (assoc "path" entry :test 'string=))
-                            :kind (cdr (assoc "kind" entry :test 'string=))
-                            :file-type (cdr (assoc "fileType" entry :test 'string=))
-                            :detail-type (cdr (assoc "detailType" entry :test 'string=)))))
-                :stream stream)))
+              collect
+                (let* ((path (cdr (assoc "path" entry :test 'string=)))
+                       (name-match (cl-ppcre:all-matches "[^/]+/*$" path))
+                       (name (subseq path (car name-match) (cadr name-match)))
+                       (kind (cdr (assoc "kind" entry :test 'string=)))
+                       (file-type (cdr (assoc "fileType" entry :test 'string=)))
+                       (detail-type (cdr (assoc "detailType" entry :test 'string=))))
+                  (list :path path
+                        :name name
+                        :kind kind
+                        :file-type file-type
+                        :detail-type detail-type))))
+     :stream stream)))
 
 (hunchentoot:define-easy-handler (index :uri "/") ()
   (generate-index-page))
