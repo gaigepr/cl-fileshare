@@ -16,7 +16,7 @@
             (dolist (dir listing)
               (if (cl-fad:directory-exists-p dir)
                   (push (list (cons "path" (namestring dir))
-                              (cons "kind" "Folder"))
+                              (cons "kind" "Directory"))
                         json-listing)
                   (multiple-value-bind (type detail) (cl-mime:lookup-mime dir)
                     (push (list (cons "path" (namestring dir))

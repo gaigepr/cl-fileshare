@@ -3,7 +3,7 @@
     <title>Fileshare</title>
     <meta charset="utf-8"/>
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css"/>
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <!-- <link rel="stylesheet" type="text/css" href="/static/css/style.css"/> -->
     <!-- <script src="/static/js/jquery-2.1.1.min.js"></script> -->
     <!-- <script src="/static/js/bootstrap.min.js"></script> -->
     <!-- <script src="/static/js/angular.js"></script> -->
@@ -31,7 +31,7 @@
       <tr>
         <td>
           <div style="text-overflow: ellipses; width: 250px;">
-            <a href="<!-- tmpl_var path -->">
+            <a href="<!-- tmpl_var name-link -->" target="<!-- tmpl_var name-link-target -->">
               <!-- tmpl_var name -->
             </a>
           </div>
@@ -42,7 +42,7 @@
           <!-- tmpl_var detail-type -->
         </td>
         <td>
-          <a href="/dl<!-- tmpl_var path -->">
+          <a href="/dl<!-- tmpl_var path -->" target="_blank">
             <span class="glyphicon glyphicon-cloud-download"></span>
           </a>
         </td>
