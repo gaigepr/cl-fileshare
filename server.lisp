@@ -1,15 +1,22 @@
 (in-package :cl-fileshare)
 
+(defun make-crumbs (path)
+
+  )
+
 (defun generate-index-page ()
-  (let ((index-path (subseq (hunchentoot:request-uri hunchentoot:*request*) 6)))
+  (let ((index-path (subseq (hunchentoot:request-uri hunchentoot:*request*) 7)))
+    (log:debug index-path)
     (with-output-to-string (stream)
       (html-template:fill-and-print-template
        #P"static/index.tmpl"
        (list :current-path index-path
              :index
-             (loop for entry in (index-directory index-path)
+             (loop for entry in (index-directory (concatenate 'string *share-root* index-path))
                 collect
-                  (let* ((path (cdr (assoc "path" entry :test 'string=)))
+                  (let* ((path (concatenate 'string "/" (string-left-trim
+                                                         *share-root*
+                                                         (cdr (assoc "path" entry :test 'string=)))))
                          (name-match (cl-ppcre:all-matches "[^/]+/*$" path))
                          (name (subseq path (car name-match) (cadr name-match)))
                          (kind (cdr (assoc "kind" entry :test 'string=)))
@@ -31,8 +38,9 @@
        :stream stream))))
 
 (defun download-file-or-directory ()
-  (let ((path (subseq (hunchentoot:request-uri hunchentoot:*request*) 3)))
-    (log:debug path)
+  (let ((path
+         (concatenate 'string *share-root*
+                      (subseq (hunchentoot:request-uri hunchentoot:*request*) 4))))
     (cond ((cl-fad:directory-exists-p path)
            (multiple-value-bind (output message status)
                (trivial-shell:shell-command
@@ -42,9 +50,6 @@
                  (log:debug (format nil "Failed ~a ~a ~a" output message status)))))
           ((cl-fad:file-exists-p path)
              (hunchentoot:handle-static-file path)))))
-
-(hunchentoot:define-easy-handler (index :uri "/") ()
-  (generate-index-page))
 
 (defun configure-logging (&key (log-file *log-file*))
   (if *debug*
