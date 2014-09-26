@@ -15,9 +15,9 @@
              :index
              (loop for entry in (index-directory index-path)
                 collect
-                  (let* ((path (concatenate 'string "/" (string-left-trim
-                                                         *share-root*
-                                                         (cdr (assoc "path" entry :test 'string=)))))
+                  (let* ((path (concatenate 'string "/" (subseq
+                                                         (cdr (assoc "path" entry :test 'string=))
+                                                         (length *share-root*))))
                          (name-match (cl-ppcre:all-matches "[^/]+/*$" path))
                          (name (subseq path (car name-match) (cadr name-match)))
                          (kind (cdr (assoc "kind" entry :test 'string=)))
@@ -29,7 +29,7 @@
                                                ""))
                          (file-type (cdr (assoc "fileType" entry :test 'string=)))
                          (detail-type (cdr (assoc "detailType" entry :test 'string=))))
-                    ;;(log:debug (format nil "~a ~a ~a ~a ~a" path name kind name-link name-link-target))
+                    (log:debug (cdr (assoc "path" entry :test 'string=)))
                     (list :path path
                           :name name
                           :kind kind
