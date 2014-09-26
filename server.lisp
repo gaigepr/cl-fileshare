@@ -5,14 +5,15 @@
   )
 
 (defun generate-index-page ()
-  (let ((index-path (subseq (hunchentoot:request-uri hunchentoot:*request*) 7)))
-    (log:debug index-path)
+  (let ((index-path (concatenate 'string *share-root* (subseq (hunchentoot:request-uri hunchentoot:*request*) 7)))
+        (url-path (subseq (hunchentoot:request-uri hunchentoot:*request*) 6)))
+    (log:debug (format nil "index-path: ~a url-path: ~a" index-path url-path))
     (with-output-to-string (stream)
       (html-template:fill-and-print-template
        #P"static/index.tmpl"
-       (list :current-path index-path
+       (list :current-path url-path
              :index
-             (loop for entry in (index-directory (concatenate 'string *share-root* index-path))
+             (loop for entry in (index-directory index-path)
                 collect
                   (let* ((path (concatenate 'string "/" (string-left-trim
                                                          *share-root*
@@ -28,6 +29,7 @@
                                                ""))
                          (file-type (cdr (assoc "fileType" entry :test 'string=)))
                          (detail-type (cdr (assoc "detailType" entry :test 'string=))))
+                    ;;(log:debug (format nil "~a ~a ~a ~a ~a" path name kind name-link name-link-target))
                     (list :path path
                           :name name
                           :kind kind
