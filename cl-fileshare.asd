@@ -3,16 +3,15 @@
 
 (defsystem cl-fileshare
   :name "cl-fileshare"
-  :version "0.0"
+  :version "1.0"
   :author "Gaige Pierce-Raison"
   :description ""
-  :depends-on (:cl-json
-               :cl-fad
+  :depends-on (:cl-fad
+               :cl-json
                :cl-mime
                :html-template
                :hunchentoot
                :log4cl
-               :sb-concurrency
                :trivial-shell)
   :components ((:file "package")
                (:file "globals" :depends-on ("package"))

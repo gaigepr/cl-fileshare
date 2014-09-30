@@ -1,14 +1,10 @@
 (in-package :cl-fileshare)
 
-(defun make-crumbs (path)
-
-  )
-
-(defun crumbify (path)
-  (log:debug path))
-
 (defun generate-index-page ()
-  (let ((index-path (concatenate 'string *share-root* (subseq (hunchentoot:request-uri hunchentoot:*request*) 7)))
+  (let ((index-path
+         (concatenate 'string
+                      *share-root*
+                      (subseq (hunchentoot:request-uri hunchentoot:*request*) 7)))
         (url-path (subseq (hunchentoot:request-uri hunchentoot:*request*) 6)))
     (log:debug (format nil "index-path: ~a url-path: ~a" index-path url-path))
     (with-output-to-string (stream)
@@ -20,19 +16,19 @@
              (loop for entry in (index-directory index-path)
                 collect
                   (let* ((path (concatenate 'string "/" (subseq
-                                                         (cdr (assoc "path" entry :test 'string=))
+                                                         (cdr (assoc :path entry))
                                                          (length *share-root*))))
                          (name-match (cl-ppcre:all-matches "[^/]+/*$" path))
                          (name (subseq path (car name-match) (cadr name-match)))
-                         (kind (cdr (assoc "kind" entry :test 'string=)))
+                         (kind (cdr (assoc :kind entry)))
                          (name-link (if (string= kind "File")
                                         (format nil "/dl~a" path)
                                         (format nil "/share~a" path)))
                          (name-link-target (if (string= kind "File")
                                                "_blank"
                                                ""))
-                         (file-type (cdr (assoc "fileType" entry :test 'string=)))
-                         (detail-type (cdr (assoc "detailType" entry :test 'string=))))
+                         (file-type (cdr (assoc :fileType entry)))
+                         (detail-type (cdr (assoc :detailType entry))))
                     (list :path path
                           :name name
                           :kind kind
@@ -43,18 +39,22 @@
        :stream stream))))
 
 (defun download-file-or-directory ()
-  (let ((path
-         (concatenate 'string *share-root*
-                      (subseq (hunchentoot:request-uri hunchentoot:*request*) 4))))
-    (cond ((cl-fad:directory-exists-p path)
-           (multiple-value-bind (output message status)
-               (trivial-shell:shell-command
-                (format nil "tar -cvf ~a~a.tar ~a" "/tmp/fileshare/" "download" path))
-             (if (eq status 0)
-                 (hunchentoot:handle-static-file (format nil "~a~a" "/tmp/fileshare/" "download.tar"))
-                 (log:debug (format nil "Failed ~a ~a ~a" output message status)))))
-          ((cl-fad:file-exists-p path)
-             (hunchentoot:handle-static-file path)))))
+  (let ((path (concatenate 'string *share-root*
+                           (subseq (hunchentoot:request-uri hunchentoot:*request*) 4))))
+    (if (child-directory-p path *share-root*)
+      (cond ((cl-fad:directory-exists-p path)
+             (multiple-value-bind (output message status)
+                 (trivial-shell:shell-command
+                  (format nil "tar -cvf ~a~a.tar ~a"
+                          "/tmp/fileshare/" "download" path))
+               (if (eq status 0)
+                   (hunchentoot:handle-static-file (format nil "~a~a"
+                                                           "/tmp/fileshare/"
+                                                           "download.tar"))
+                   (log:debug (format nil "Failed ~a ~a ~a" output message status)))))
+            ((cl-fad:file-exists-p path)
+             (hunchentoot:handle-static-file path)))
+      (hunchentoot:redirect "/share/"))))
 
 (defun configure-logging (&key (log-file *log-file*))
   (if *debug*
@@ -80,17 +80,17 @@
     (push (hunchentoot:create-regex-dispatcher
            "^/dl/" 'download-file-or-directory)
           hunchentoot:*dispatch-table*))
-  (setq *file-server*
+  (setq *fileshare-server*
         (make-instance
          'hunchentoot:easy-acceptor
-         :port *file-port*
+         :port *fileshare-port*
          :access-log-destination "fileshare-access.log"
          :message-log-destination "fileshare-error.log"))
-  (hunchentoot:start *file-server*))
+  (hunchentoot:start *fileshare-server*))
 
 (defun stop-fileshare ()
-  (when *file-server*
-    (hunchentoot:stop *file-server* :soft t)))
+  (when *fileshare-server*
+    (hunchentoot:stop *fileshare-server* :soft t)))
 
 (defun restart-fileshare ()
   (stop-fileshare)
