@@ -4,6 +4,9 @@
 
   )
 
+(defun crumbify (path)
+  (log:debug path))
+
 (defun generate-index-page ()
   (let ((index-path (concatenate 'string *share-root* (subseq (hunchentoot:request-uri hunchentoot:*request*) 7)))
         (url-path (subseq (hunchentoot:request-uri hunchentoot:*request*) 6)))
@@ -12,6 +15,7 @@
       (html-template:fill-and-print-template
        #P"static/index.tmpl"
        (list :current-path url-path
+             ;;:parent-path (namestring (truename (cl-fad:merge-pathnames-as-directory url-path "../")))
              :index
              (loop for entry in (index-directory index-path)
                 collect
@@ -29,7 +33,6 @@
                                                ""))
                          (file-type (cdr (assoc "fileType" entry :test 'string=)))
                          (detail-type (cdr (assoc "detailType" entry :test 'string=))))
-                    (log:debug (cdr (assoc "path" entry :test 'string=)))
                     (list :path path
                           :name name
                           :kind kind

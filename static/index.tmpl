@@ -18,10 +18,8 @@
         <tr>
           <th>
 
-            <!-- tmpl_loop crumbs -->
-            <a href="<!-- tmpl_var link -->"><!-- tmpl_var crumb --></a>
-            <span class="glyphicon glyphicon-chevron-right"></span>
-            <!-- /tmpl_loop -->
+            <a href="../"><!-- tmpl_var current-path --></a>
+            <span class="glyphicon glyphicon-arrow-up"></span>
 
             <!-- tmpl_var current-path -->
           </th>
@@ -33,6 +31,14 @@
           </th>
         </tr>
       </thead>
+      <!-- <tr> -->
+      <!--   <td> -->
+      <!--     <a href="<\!-- tmpl_var parent-path -\->"> -->
+      <!--       <span class="glyphicon glyphicon-arrow-up"></span><h4>Parent Directory</h4> -->
+      <!--     </a> -->
+      <!--   </td> -->
+      <!--   <td></td><td></td> -->
+      <!-- </tr> -->
        <!-- tmpl_loop index -->
       <tr>
         <td>
